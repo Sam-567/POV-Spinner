@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -6,51 +7,46 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
-public class GridToArc extends JFrame{
+public class GridToArc{
 	
 	static final int SIZE = 400;
-	static final int MODSTEPS = 10;
-	static final int MODSTEPDISTANCE = SIZE / (2* MODSTEPS); //Modsteps go out from center
+	static final int MODSTEPS = 20;
+	static final double MODSTEPDISTANCE = SIZE / (2* MODSTEPS); //Modsteps go out from center
 	
-	static final int ARGSTEPS = 20;
-	static final int ARGSTEP = 360/20;
-	static final int ANGLE = 400;
+	static final int ARGSTEPS = 40;
+	static final double ARGSTEP = 360/ARGSTEPS;
 	//static final double 
 	
 	public static void main( String[] args) {
 		GridToArc g = new GridToArc();
 		//g.squareToRadial();
-		g.TestValidPos();
-	}
-	
-	public void squareToRadial() {
-		BufferedImage Image = null;
+		//g.TestValidPos();
+		//g.ValidPosImg();
 		
-		int xCenter = SIZE/2;
-		int yCenter = SIZE/2;
-		
-		int[][][] radialImage = new int[3][ARGSTEPS][10];
-		
-		
-		try { 
-		    File img = new File("testPhoto.png");
-		    Image = ImageIO.read(img ); 
-		} catch (IOException e){
+		BufferedImage convert = null;
+		try {
+			convert = ImageIO.read( new File ("MarioTest.png"));
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		int Red = (new Color( Image.getRGB(1, 1))).getRed();
-		System.out.println(Red);
 		
+		int[][][] radial = g.squareToRadial(convert);
+		g.drawRadial(radial);
+		
+	}
+	
+	public int[][][] squareToRadial(BufferedImage Squareimg) {
+		
+		int[][][] radialImage = new int[3][ARGSTEPS][MODSTEPS];
+
 		int pixels;
-			
 		int RedSum;
 		int GreenSum;
 		int BlueSum;
-		int ono = 0;
+
 		for (int Arg = 0; Arg < ARGSTEPS; Arg++) {
 			
-			for (int Mod = 0; Mod < 10; Mod++) {
+			for (int Mod = 0; Mod < MODSTEPS; Mod++) {
 				
 				RedSum = 0;
 				GreenSum = 0;
@@ -61,9 +57,9 @@ public class GridToArc extends JFrame{
 					
 					for (int y = 0; y < 400; y++) {
 						
-						if( ValidPos (x-200, y-200, Arg, Mod) ) {
+						if( ValidPos (x-200, 200-y, Arg, Mod) ) {
 							pixels++;
-							Color pixel = new Color( Image.getRGB(x, y));
+							Color pixel = new Color( Squareimg.getRGB(x, y));
 							
 							RedSum += pixel.getRed();
 							BlueSum += pixel.getBlue();
@@ -71,86 +67,129 @@ public class GridToArc extends JFrame{
 						}
 					}
 				}
-
 				
-				if(pixels != 0) {
-				//if(RedSum != 0) {
+				if (pixels != 0) {
 					radialImage[0][Arg][Mod] = RedSum/pixels;
-					//radialImage[1][Arg][Mod] = BlueSum/pixels;
-					//radialImage[2][Arg][Mod] = GreenSum/pixels;
-				} else {
-					System.out.println("ono" + ono++);
+					radialImage[1][Arg][Mod] = GreenSum/pixels;
+					radialImage[2][Arg][Mod] = BlueSum/pixels;
 				}
-
-				System.out.println(Mod +" | " + Arg + " | " + radialImage[0][Arg][Mod]);
+			}
+		}	
+		return radialImage;
+	}
+	
+	public void drawRadial(int[][][] Inputimg) {
+		BufferedImage Outputimg = new BufferedImage( 400, 400, BufferedImage.TYPE_3BYTE_BGR);
+		
+		for (int Arg = 0; Arg < ARGSTEPS; Arg++) {	
+			for (int Mod  = 0; Mod < MODSTEPS; Mod++) {	
 				
+				//int SegmentColor = new Color( Inputimg[0][Arg][Mod], Inputimg[1][Arg][Mod], Inputimg[2][Arg][Mod]).getRGB();  
+				int SegmentColor = (Inputimg[0][Arg][Mod] << 16 | Inputimg[1][Arg][Mod] << 8 | Inputimg[2][Arg][Mod]);
+				
+				for (int x = 0; x < 400; x++) {
+					for (int y = 0; y < 400; y++) {
+						if( ValidPos( x - 200, 200-y, Arg, Mod)) {
+							Outputimg.setRGB(x, y, SegmentColor);
+						}
+					}
+				}
 			}
 		}
-		//drawRadial(radialImage);
-		
-	}
-	
-	public void drawRadial(int[][][] img) {
-		for (int Arg = 0; Arg < 18; Arg++) {
-			for (int Mod = 0; Mod < 10; Mod++) {
-				System.out.println(Mod +" | " + Arg + " | " + img[0][Arg][Mod]);
-			}
+		System.out.println("Starting writing");
+		File Output = new File("It's a me" + ".jpg");
+		try {
+			ImageIO.write(Outputimg, "jpg", Output);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
-	
-	//10 MODs (10 led on one side)
-	//20 Rads (positions of 10*)
 
 	
-	public boolean ValidPos(int x, int y, int Arg, int Mod) {
-		int InnerLimit = MODSTEPDISTANCE * Mod;
-		int OuterLimit = InnerLimit + MODSTEPDISTANCE;
+	public void ValidPosImg() {
+		for(int Arg = 0; Arg < ARGSTEPS; Arg++) {
+			
+			BufferedImage img = new BufferedImage( 400, 400, BufferedImage.TYPE_3BYTE_BGR);
+			
+			for (int x = 0; x < 400; x++) {
+				for (int y = 0; y < 400; y++) {
+					for (int mod  = 0; mod < MODSTEPS; mod++) {
+						if( ValidPos( x - 200, 200-y, Arg, mod)) {
+							
+							
+							img.setRGB(x, y, Color.ORANGE.getRGB() );
+						}
+					}
+				}
+			}
+			File Output = new File("Arg " + Arg + ".jpg");
+			try {
+				ImageIO.write(img, "jpg", Output);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+	public boolean ValidPos (int x, int y, int Arg, int Mod) {
+		double InnerLimit = MODSTEPDISTANCE * Mod;
+		double OuterLimit = InnerLimit + MODSTEPDISTANCE;
 		
-		Double MaxGrad = 1 / Math.tan( (Arg*ARGSTEP+0.000000001)*Math.PI/180 );
-		Double MinGrad =  1 / Math.tan( ((Arg+1)*ARGSTEP+0.000000001)*Math.PI/180 );
+		Double MaxGrad = 1 / Math.tan( (Arg*ARGSTEP+0.0000001)*Math.PI/180 );
+		Double MinGrad =  1 / Math.tan( ((Arg+1)*ARGSTEP-0.0000001)*Math.PI/180 );
+
 		
-		//if(M)
+		if ( Arg > ARGSTEPS/2 -1) {
+			//Swap the two
+			Double temp = MaxGrad;
+			MaxGrad = MinGrad;
+			MinGrad = temp;
+		}
+			
+				
 		int CenterDistance = x*x + y*y;
 
-		
 		Boolean InCircles = ( CenterDistance <= OuterLimit*OuterLimit ) && ( CenterDistance >= InnerLimit*InnerLimit ) ;
-
-		
 		Boolean InTriangle = (y >= MinGrad*x) && (y <= MaxGrad*x);
 
-		
-
-		if(true) {
-			
-			System.out.println("InnerLimit " + InnerLimit);
-			System.out.println("OuterLimit " + OuterLimit);
-			System.out.println("MAXGRAD " + MaxGrad);
-			System.out.println("MINGRAD " + MinGrad);
-			System.out.println(CenterDistance);
-			System.out.println(InCircles);
-			System.out.println(InTriangle);
-		}
 		return InCircles && InTriangle;
 		
 	}
 	
+	
 	public void TestValidPos() {
 		
-		System.out.println(Math.tan(3.05));
 		//assert(false);
 		assert( ValidPos( 1, 10, 0, 0) );
-		assert( ValidPos( -1, 2, 9, 0) );
-		System.out.println("--------------");
-		/*assert( ValidPos( 1, 30, 0, 1) );
+		assert(false);
+		assert( ValidPos( -1, 4, 19, 0) );
+		assert( ValidPos( 1, -4, 9, 0) );
+		assert( ValidPos( -1, -4, 10, 0) );
+
+		assert( ValidPos( 1, 30, 0, 1) );
 		assert( !ValidPos( 30, 30, 0 ,0 ));
 		assert( ValidPos( 20, 40, 1, 2) );
 		assert( !ValidPos( -20, -40, 1, 1) );
 		assert( !ValidPos( -40, -20, 1, 1) );
 		assert( ValidPos( 1, 199, 0, 9) );
-		assert( ValidPos( -1, 199, 19, 9) ); //fuck this one in particular @#$%^&
+		assert( ValidPos( -1, 199, 19, 9) );
 		assert( !ValidPos( -1, -199, 19, 9) ); 
-		assert( !ValidPos( 0, 200, 0, 8) );*/
+		assert( !ValidPos( 0, 200, 0, 8) );
+		
+		assert( ValidPos(10, 6, 3, 0) );
+		assert( !ValidPos(10, 3, 3, 0) );
+		
+		assert( ValidPos(-10, 6, 16, 0) );
+		assert( !ValidPos(10, -6, 16, 0) );
+		
+		
+		
 		
 		System.out.println("PASSED!!! :D");
 	}
 }
+
+//20 == 0 in arg
