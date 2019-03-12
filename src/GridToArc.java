@@ -13,7 +13,7 @@ public class GridToArc{
 	static final int MODSTEPS = 20;
 	static final double MODSTEPDISTANCE = SIZE / (2* MODSTEPS); //Modsteps go out from center
 	
-	static final int ARGSTEPS = 40;
+	static final int ARGSTEPS = 120;
 	static final double ARGSTEP = 360/ARGSTEPS;
 	//static final double 
 	
@@ -25,7 +25,7 @@ public class GridToArc{
 		
 		BufferedImage convert = null;
 		try {
-			convert = ImageIO.read( new File ("MarioTest.png"));
+			convert = ImageIO.read( new File ("Icon.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -97,7 +97,7 @@ public class GridToArc{
 			}
 		}
 		System.out.println("Starting writing");
-		File Output = new File("It's a me" + ".jpg");
+		File Output = new File("WeatherIcon" + ".jpg");
 		try {
 			ImageIO.write(Outputimg, "jpg", Output);
 		} catch (IOException e) {
@@ -127,7 +127,6 @@ public class GridToArc{
 			try {
 				ImageIO.write(img, "jpg", Output);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -164,7 +163,6 @@ public class GridToArc{
 		
 		//assert(false);
 		assert( ValidPos( 1, 10, 0, 0) );
-		assert(false);
 		assert( ValidPos( -1, 4, 19, 0) );
 		assert( ValidPos( 1, -4, 9, 0) );
 		assert( ValidPos( -1, -4, 10, 0) );
