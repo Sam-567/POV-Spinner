@@ -21,6 +21,33 @@ void setup() {
 
 }
 
+int BackgroundMagnetism(){
+  long startTime = millis();
+
+  int Occurances[40];
+  //Find mode as that is what background will be
+  //Safe to assume background value will be between 400-600 so other can be ommitted
+  while( millis() - startTime < 3000){
+    int SimplifiedValue = (analogRead(readPin)-300) / 5;
+    if ( SimplifiedValue > 0 && SimplifiedValue < 40){
+      Occurances[SimplifiedValue]++;
+    }
+  }
+
+  //Find mode of Occurances
+  int LargestNum = Occurances[0];
+  int IndexOfNum = 1;
+  for(int i = 1; i < 40; i++){
+    if ( Occurances[i] > LargestNum){
+      IndexOfNum = i;
+      LargestNum = Occurances[i];
+    }
+  }
+
+  int Mode = IndexOfNum*5 + 300 + 1;
+  return Mode;
+}
+
 void loop() {
 
   while ( abs( analogRead(readPin) - standard ) <= tolerance ) {
