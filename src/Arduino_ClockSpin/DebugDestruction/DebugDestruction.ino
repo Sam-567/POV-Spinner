@@ -7,7 +7,7 @@ unsigned long PastTimes[] = {0, 0, 0};
 unsigned long average;
 
 int standard = 530;
-int tolerance = 12;
+int tolerance = 8;
 int readPin = A0;
 
 #define PIN 6
@@ -22,27 +22,19 @@ void setup() {
   
   int i = 0;
   while (i < TRUEPIXELS) {
-    pixels.setPixelColor(i, pixels.Color(120,120,0));
-    i++;
-  }
-  pixels.show();
-
-  delay(500);
-  pinMode(readPin, INPUT);
-  Serial.begin(9600);
-
-  delay(6000);
-
-  i = 0;
-  while (i < TRUEPIXELS) {
     pixels.setPixelColor(i, pixels.Color(0,0,0));
     i++;
   }
   pixels.show();
-  
+  delay(500);
+  pinMode(readPin, INPUT);
+  Serial.begin(9600);
+  Serial.println("HUH");
   LastTime = millis();
 
-
+  Serial.println(PastTimes[0]);
+  Serial.println(PastTimes[1]);
+  Serial.println(PastTimes[2]);
 }
 
 int BackgroundMagnetism(){
@@ -74,18 +66,25 @@ int BackgroundMagnetism(){
 
 void loop() {
 
-
-  while ( abs( analogRead(readPin) - standard ) <= tolerance && millis() - LastTime > 8 ) {
-    delay(1);
+  //Serial.println("A");
+  
+  while ( abs( analogRead(readPin) - standard ) <= tolerance  ) {
+    delay(0.5);
   }
-
+  
+  //Serial.println("B");
+  
   LastTime = CurrentTime;
   CurrentTime = millis();
   PastTimes[2] = PastTimes[1];
   PastTimes[1] = PastTimes[0];
-  PastTimes[0] = CurrentTime - LastTime;
+  PastTimes[0] = LastTime-CurrentTime;
 
-  // TODO Check times are not close together
+  Serial.println(PastTimes[0]);
+  Serial.println(PastTimes[1]);
+  Serial.println(PastTimes[2]);
+
+  //Check times are not close together
   
   average = ( PastTimes[0] + PastTimes[1] + PastTimes[2])/3;
   
@@ -100,27 +99,40 @@ void loop() {
   pixels.show();
 
 
-  /*Show Green quarter
+  //Show Yellow quarter
+  for (int i = 0; i < NUMPIXELS; i++){
+    pixels.setPixelColor(i, pixels.Color( 150, 50, 1204));
+  }
+
+  while( millis() < CurrentTime + average/4){
+    //delay( millis() - (CurrentTime+average/4 - 1));
+    delay(0.5);
+  }
+  pixels.show();
+
+
+  //Show Green quarter
   for (int i = 0; i < NUMPIXELS; i++){
     pixels.setPixelColor(i, pixels.Color( 0, 255, 0));
   }
 
-  while( millis() < CurrentTime + average/3){
-    //delay( millis() - (CurrentTime + average/3));
-    delay(1);
+  while( millis() < CurrentTime + average/2){
+    //delay( millis() - (CurrentTime + average/2 - 1));
+    delay(0.5);
   }
   pixels.show();
-*/
+
   
   //Show Blue quarter
   for (int i = 0; i < NUMPIXELS; i++){
     pixels.setPixelColor(i, pixels.Color( 0, 0, 255));
   }
 
-  while( millis() < CurrentTime + average/2){
-    //delay( millis() - (CurrentTime + 2*average/3));
-    delay(1);
+  while( millis() < CurrentTime + 3*average/2){
+    //delay( millis() - (CurrentTime + 3*average/2 - 1));
+    delay(0.5);
   }
   pixels.show();
 
+ //Serial.println("C");
 }

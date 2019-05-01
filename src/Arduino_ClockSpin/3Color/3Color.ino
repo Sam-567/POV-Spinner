@@ -75,7 +75,7 @@ int BackgroundMagnetism(){
 void loop() {
 
 
-  while ( abs( analogRead(readPin) - standard ) <= tolerance && millis() - LastTime > 8 ) {
+  while ( abs( analogRead(readPin) - standard ) <= tolerance) {
     delay(1);
   }
 
@@ -89,20 +89,22 @@ void loop() {
   
   average = ( PastTimes[0] + PastTimes[1] + PastTimes[2])/3;
   
-  
-  Serial.println(average);
-  Serial.println(millis());
+  for (int i = 0; i < NUMPIXELS; i++){
+    pixels.setPixelColor(i, pixels.Color( 0, 0, 0));
+  }
+  pixels.show();
+  delay(3);
   
   //Show Red quarter
   for (int i = 0; i < NUMPIXELS; i++){
-    pixels.setPixelColor(i, pixels.Color( 255, 0, 0));
+    pixels.setPixelColor(i, pixels.Color( 100, 0, 0));
   }
   pixels.show();
 
 
-  /*Show Green quarter
+  //Show Green quarter
   for (int i = 0; i < NUMPIXELS; i++){
-    pixels.setPixelColor(i, pixels.Color( 0, 255, 0));
+    pixels.setPixelColor(i, pixels.Color( 0, 100, 0));
   }
 
   while( millis() < CurrentTime + average/3){
@@ -110,17 +112,18 @@ void loop() {
     delay(1);
   }
   pixels.show();
-*/
+
   
   //Show Blue quarter
   for (int i = 0; i < NUMPIXELS; i++){
-    pixels.setPixelColor(i, pixels.Color( 0, 0, 255));
+    pixels.setPixelColor(i, pixels.Color( 0, 0, 100));
   }
 
-  while( millis() < CurrentTime + average/2){
+  while( millis() < CurrentTime + (2*average/3)-16){
     //delay( millis() - (CurrentTime + 2*average/3));
     delay(1);
   }
   pixels.show();
 
+  Serial.println(average);
 }

@@ -45,33 +45,6 @@ void setup() {
 
 }
 
-int BackgroundMagnetism(){
-  long startTime = millis();
-
-  int Occurances[40];
-  //Find mode as that is what background will be
-  //Safe to assume background value will be between 400-600 so other can be ommitted
-  while( millis() - startTime < 3000){
-    int SimplifiedValue = (analogRead(readPin)-300) / 5;
-    if ( SimplifiedValue > 0 && SimplifiedValue < 40){
-      Occurances[SimplifiedValue]++;
-    }
-  }
-
-  //Find mode of Occurances
-  int LargestNum = Occurances[0];
-  int IndexOfNum = 1;
-  for(int i = 1; i < 40; i++){
-    if ( Occurances[i] > LargestNum){
-      IndexOfNum = i;
-      LargestNum = Occurances[i];
-    }
-  }
-
-  int Mode = IndexOfNum*5 + 300 + 1;
-  return Mode;
-}
-
 void loop() {
 
 
@@ -85,40 +58,23 @@ void loop() {
   PastTimes[1] = PastTimes[0];
   PastTimes[0] = CurrentTime - LastTime;
 
-  // TODO Check times are not close together
-  
+
   average = ( PastTimes[0] + PastTimes[1] + PastTimes[2])/3;
   
-  
-  Serial.println(average);
-  Serial.println(millis());
-  
-  //Show Red quarter
+
+  //Show Red segment
   for (int i = 0; i < NUMPIXELS; i++){
     pixels.setPixelColor(i, pixels.Color( 255, 0, 0));
   }
   pixels.show();
 
 
-  /*Show Green quarter
-  for (int i = 0; i < NUMPIXELS; i++){
-    pixels.setPixelColor(i, pixels.Color( 0, 255, 0));
-  }
-
-  while( millis() < CurrentTime + average/3){
-    //delay( millis() - (CurrentTime + average/3));
-    delay(1);
-  }
-  pixels.show();
-*/
-  
-  //Show Blue quarter
+  //Show Blue segment
   for (int i = 0; i < NUMPIXELS; i++){
     pixels.setPixelColor(i, pixels.Color( 0, 0, 255));
   }
 
-  while( millis() < CurrentTime + average/2){
-    //delay( millis() - (CurrentTime + 2*average/3));
+  while( millis() < CurrentTime + 0.6*average){
     delay(1);
   }
   pixels.show();
