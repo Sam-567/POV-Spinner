@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 public class GridToArc{
 	
 	static final int SIZE = 400;
-	static final int MODSTEPS = 20;
+	static final int MODSTEPS = 14;
 	static final double MODSTEPDISTANCE = SIZE / (2* MODSTEPS); //Modsteps go out from center
 	
 	static final int ARGSTEPS = 120;
@@ -25,13 +25,14 @@ public class GridToArc{
 		
 		BufferedImage convert = null;
 		try {
-			convert = ImageIO.read( new File ("Icon.png"));
+			convert = ImageIO.read( new File ("MarioTest.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		int[][][] radial = g.squareToRadial(convert);
-		g.drawRadial(radial);
+		//g.drawRadial(radial);
+		g.printImg(radial);
 		
 	}
 	
@@ -97,7 +98,7 @@ public class GridToArc{
 			}
 		}
 		System.out.println("Starting writing");
-		File Output = new File("WeatherIcon" + ".jpg");
+		File Output = new File("Reality" + ".jpg");
 		try {
 			ImageIO.write(Outputimg, "jpg", Output);
 		} catch (IOException e) {
@@ -106,6 +107,25 @@ public class GridToArc{
 		}
 	}
 
+	public void printImg(int[][][] Inputimg) {
+		String Img = "{ ";
+		for(int[][] level1 : Inputimg) {
+			Img +="\n {";
+			for(int[] level2: level1) {
+				Img += "\n { ";
+				for(int level3: level2) {
+					Img += level3 + ", ";
+				}
+				Img = Img.substring(0, Img.length() - 1);
+				Img += " },";
+			}
+			Img = Img.substring(0, Img.length() - 1);
+			Img += " }, ";
+		}
+		Img = Img.substring(0, Img.length() - 1);
+		Img += " };";
+		System.out.println(Img);
+	}
 	
 	public void ValidPosImg() {
 		for(int Arg = 0; Arg < ARGSTEPS; Arg++) {
