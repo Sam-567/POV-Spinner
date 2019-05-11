@@ -13,7 +13,7 @@ public class GridToArc{
 	static final int MODSTEPS = 14;
 	static final double MODSTEPDISTANCE = SIZE / (2* MODSTEPS); //Modsteps go out from center
 	
-	static final int ARGSTEPS = 30;
+	static final int ARGSTEPS = 72;
 	static final double ARGSTEP = 360/ARGSTEPS;
 	//static final double 
 	
@@ -25,7 +25,7 @@ public class GridToArc{
 		
 		BufferedImage convert = null;
 		try {
-			convert = ImageIO.read( new File ("../MarioTest.png"));
+			convert = ImageIO.read( new File ("MarioTest.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
