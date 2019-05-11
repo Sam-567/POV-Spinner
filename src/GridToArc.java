@@ -13,7 +13,7 @@ public class GridToArc{
 	static final int MODSTEPS = 14;
 	static final double MODSTEPDISTANCE = SIZE / (2* MODSTEPS); //Modsteps go out from center
 	
-	static final int ARGSTEPS = 120;
+	static final int ARGSTEPS = 30;
 	static final double ARGSTEP = 360/ARGSTEPS;
 	//static final double 
 	
@@ -25,13 +25,13 @@ public class GridToArc{
 		
 		BufferedImage convert = null;
 		try {
-			convert = ImageIO.read( new File ("MarioTest.png"));
+			convert = ImageIO.read( new File ("../MarioTest.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		int[][][] radial = g.squareToRadial(convert);
-		//g.drawRadial(radial);
+		g.drawRadial(radial);
 		g.printImg(radial);
 		
 	}
@@ -116,11 +116,11 @@ public class GridToArc{
 				for(int level3: level2) {
 					Img += level3 + ", ";
 				}
-				Img = Img.substring(0, Img.length() - 1);
+				Img = Img.substring(0, Img.length() - 2);
 				Img += " },";
 			}
 			Img = Img.substring(0, Img.length() - 1);
-			Img += " }, ";
+			Img += " },";
 		}
 		Img = Img.substring(0, Img.length() - 1);
 		Img += " };";

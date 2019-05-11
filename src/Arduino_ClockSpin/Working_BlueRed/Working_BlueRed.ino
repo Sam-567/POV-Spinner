@@ -1,5 +1,6 @@
 
 #include <Adafruit_NeoPixel.h>
+#include <EEPROM.h>
 
 unsigned long LastTime = 0;
 unsigned long CurrentTime = 0;
@@ -13,6 +14,8 @@ int readPin = A0;
 #define PIN 6
 #define TRUEPIXELS 28
 #define NUMPIXELS 14
+
+int Spins = 0;
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(TRUEPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -58,6 +61,12 @@ void loop() {
   PastTimes[1] = PastTimes[0];
   PastTimes[0] = CurrentTime - LastTime;
 
+  Spins++;
+  if(Spins == 120){
+    EEPROM.write(1, 0);
+    EEPROM.write(0, average);
+    EEPROM.write(2, average);
+  }
 
   average = ( PastTimes[0] + PastTimes[1] + PastTimes[2])/3;
   

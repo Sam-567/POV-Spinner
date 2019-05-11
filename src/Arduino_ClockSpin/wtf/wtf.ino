@@ -1,8 +1,9 @@
 
 #include <Adafruit_NeoPixel.h>
+#include <EEPROM.h>
 
 unsigned long totalTime = 0;
-unsigned long average;
+double average;
 
 int standard = 530;
 int tolerance = 12;
@@ -11,6 +12,7 @@ int readPin = A0;
 #define PIN 6
 #define TRUEPIXELS 28
 #define NUMPIXELS 14
+#define CYCLESPERSPIN 24.0
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(TRUEPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -20,9 +22,6 @@ void setup() {
   
   Serial.begin(9600);
 
-  unsigned long test = 1234;
-  unsigned long x =test/3;
-  Serial.println(x);
 
   int i = 0;
   while (i < TRUEPIXELS) {
@@ -46,64 +45,67 @@ void setup() {
   Serial.println(average);
 }
 
-unsigned long averageSpin(){
+double averageSpin(){
 
   
   int i = 0;
-  unsigned long lastTime = millis();
+  unsigned long lastTime = micros();
   unsigned long currentTime;
   while( i < 40 ){
     while ( abs( analogRead(readPin) - standard ) <= tolerance ) {
       delay(1);
     }
-    currentTime = millis();
+    currentTime = micros();
     totalTime += currentTime - lastTime;
     lastTime = currentTime;
     delay(25);
     i++;
   }
 
-  unsigned long average = totalTime / 40;
+  double average = totalTime / 40.0;
+
   return average;
 }
 
 void loop() {
-
-  Serial.println(average);
-  Serial.println(totalTime);
-
+  
   while ( abs( analogRead(readPin) - standard ) <= tolerance ) {
     delayMicroseconds(100);
   }
 
-  unsigned long CurrentTime = millis();
+  unsigned long CurrentTime = micros();
+
+
+  for( double s = 0; s < CYCLESPERSPIN; s++){
+    //Show Red Segment
+    for (int i = 0; i < NUMPIXELS; i++){
+      pixels.setPixelColor(i, pixels.Color( 100, 0, 0));
+    }
+    
+    while( micros() < CurrentTime + (average/(CYCLESPERSPIN))*s ){
+      delayMicroseconds(10);
+    }
+    pixels.show();
+
+    
+    //Show Green segment
+    for (int i = 0; i < NUMPIXELS; i++){
+      pixels.setPixelColor(i, pixels.Color( 0, 100, 0));
+    }
   
-  //Show Red quarter
-  for (int i = 0; i < NUMPIXELS; i++){
-    pixels.setPixelColor(i, pixels.Color( 255, 0, 0));
-  }
-  pixels.show();
-
+    while( micros() < CurrentTime + (average/(3.0*CYCLESPERSPIN)) + (average/CYCLESPERSPIN)*s ){
+      delayMicroseconds(10);
+    }
+    pixels.show();
   
-  //Show Green segment
-  for (int i = 0; i < NUMPIXELS; i++){
-    pixels.setPixelColor(i, pixels.Color( 0, 255, 0));
+    //Show Blue segment
+    for (int i = 0; i < NUMPIXELS; i++){
+      pixels.setPixelColor(i, pixels.Color( 0, 0, 100));
+    }
+  
+    while( micros() < CurrentTime + (average/(3.0*CYCLESPERSPIN))*2.0 + (average/CYCLESPERSPIN)*s ){
+      delayMicroseconds(10);
+    }
+    pixels.show();
   }
-
-  while( millis() < CurrentTime + average/3){
-    delayMicroseconds(100);
-  }
-  pixels.show();
-
-  //Show Blue segment
-  for (int i = 0; i < NUMPIXELS; i++){
-    pixels.setPixelColor(i, pixels.Color( 0, 0, 255));
-  }
-
-  while( millis() < CurrentTime + (2*average)/3 ){
-    delayMicroseconds(100);
-  }
-  pixels.show();
-
-
 }
