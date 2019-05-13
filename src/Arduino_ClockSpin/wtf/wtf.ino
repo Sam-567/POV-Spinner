@@ -1,4 +1,4 @@
-
+ 
 #include <Adafruit_NeoPixel.h>
 #include <EEPROM.h>
 
@@ -12,7 +12,7 @@ int readPin = A0;
 #define PIN 6
 #define TRUEPIXELS 28
 #define NUMPIXELS 14
-#define CYCLESPERSPIN 24.0
+#define CYCLESPERSPIN 4.0
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(TRUEPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -79,7 +79,7 @@ void loop() {
   for( double s = 0; s < CYCLESPERSPIN; s++){
     //Show Red Segment
     for (int i = 0; i < NUMPIXELS; i++){
-      pixels.setPixelColor(i, pixels.Color( 100, 0, 0));
+      pixels.setPixelColor(i, pixels.Color( 100, 100, 0));
     }
     
     while( micros() < CurrentTime + (average/(CYCLESPERSPIN))*s ){
@@ -90,7 +90,7 @@ void loop() {
     
     //Show Green segment
     for (int i = 0; i < NUMPIXELS; i++){
-      pixels.setPixelColor(i, pixels.Color( 0, 100, 0));
+      pixels.setPixelColor(i, pixels.Color( 0, 100, 100));
     }
   
     while( micros() < CurrentTime + (average/(3.0*CYCLESPERSPIN)) + (average/CYCLESPERSPIN)*s ){
