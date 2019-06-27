@@ -509,6 +509,8 @@ void calculateAverageSpin(){
         x++;
       }
       strip.show();
+    } else if {
+      lastTime = micros();
     }
   }
   

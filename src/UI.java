@@ -1,3 +1,4 @@
+import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,7 +15,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.sun.prism.Image;
 
 
 public class UI extends JPanel{
@@ -38,6 +38,8 @@ public class UI extends JPanel{
 		Search.addActionListener(listener);
 		
 		Convert = new JButton("Convert");
+
+        Convert.setSize(new Dimension(400, 50));
 		Convert.setEnabled(false);
 		Convert.addActionListener(listener);
 		
@@ -70,11 +72,14 @@ public class UI extends JPanel{
 		constraints.gridx = 1;
 		this.add(editedPicture, constraints);
 
-
 	}
 	
 	public void updateInputImage() {
 		originalPicture.setIcon(new ImageIcon(startImage));
+		this.remove(Upload);
+		constraints.gridy = 0;
+		Convert.setText("Convert");
+		this.add(Convert, constraints);
 		Convert.setEnabled(true);
 		this.repaint();
 	}
@@ -84,8 +89,12 @@ public class UI extends JPanel{
 		this.remove(Convert);
 		constraints.gridy = 0;
 		this.add(Upload);
+		this.repaint();
 	}
-	
+	public void sayConverting() {
+		Convert.setText("Converting");
+		this.repaint();
+	}
 	public String selectFile() {
 		FileDialog directorySearch = new FileDialog(new JFrame(), "Select File to Open");
 	    directorySearch.setMode(FileDialog.LOAD);

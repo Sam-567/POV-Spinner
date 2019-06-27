@@ -62,6 +62,7 @@ public class POVDisplay extends JFrame implements ActionListener{
 					BufferedImage Image = ImageIO.read(new File(filePath));
 					java.awt.Image temp = Image.getScaledInstance(400, 400, Image.SCALE_SMOOTH);
 					
+					originalImage = new BufferedImage(400, 400, BufferedImage.TYPE_INT_ARGB);;
 					System.out.println(Image.getHeight());
 				    Graphics2D g2d = originalImage.createGraphics();
 				    g2d.drawImage(temp, 0, 0, null);
@@ -73,13 +74,18 @@ public class POVDisplay extends JFrame implements ActionListener{
 				}
 				userInterface.startImage = originalImage;
 				userInterface.updateInputImage();
+				repaint();
 			}
 
 		} else if(e.getSource() == userInterface.Convert) {
+			userInterface.sayConverting();
+			this.paint(this.getGraphics());
+			
 			squareToRadial(originalImage);
 			drawRadial(radialImage);
 			userInterface.finalImage = ConvertedImage;
 			userInterface.updateOutputImage();
+			this.paint(this.getGraphics());
 		}
 	}
 	
