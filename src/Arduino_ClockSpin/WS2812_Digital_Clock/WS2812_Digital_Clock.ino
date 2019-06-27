@@ -1,7 +1,8 @@
 #include <Wire.h>
 #include "RTClib.h"
-#include <Adafruit_NeoPixel.h>
-#define PIN 6
+
+#include <Adafruit_DotStar.h>
+#include <SPI.h>   
 #define NUMPIXELS 28
 
 int Numbers[][5][3] = {
@@ -79,24 +80,26 @@ int Numbers[][5][3] = {
   { 0, 0, 0}
 }};
 
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_DotStar strip(NUMPIXELS,DOTSTAR_BGR);
 
 RTC_DS1307 RTC;
-int standard = 530;
-int tolerance = 8;
+int standard = 700;
+int tolerance = 50;
 int readPin = A0;
 
 void setup() {
+  pinMode(11, OUTPUT);
+  pinMode(13, OUTPUT);
   Wire.begin();
   RTC.begin();
-  pixels.begin();
+  strip.begin();
   
   int i = 0;
   while (i < 28) {
-    pixels.setPixelColor(i, pixels.Color(0,0,0));
+    strip.setPixelColor(i, strip.Color(0,0,0));
     i++;
   }
-  pixels.show();
+  strip.show();
   delay(500);
   pinMode(readPin, INPUT);
   Serial.begin(9600);
@@ -126,68 +129,68 @@ void loop() {
   int LowHour = hour % 10;
   int HighHour = hour / 10;
 
-  
+
   while ( abs( analogRead(readPin) - standard ) <= tolerance ) {
     delay(0.5);
   }
   for (int i = 2; i >= 0; i--) {
     for ( int pin = 0; pin < 5; pin++ ) {
-      pixels.setPixelColor(pin, Numbers[LowMin][pin][i] * pixels.Color(0,150,0));
+      strip.setPixelColor(pin, Numbers[LowMin][pin][i] * strip.Color(0,150,0));
     }
-    pixels.show();
+    strip.show();
     delay(2);
   }
 
   for ( int pin = 0; pin < 12; pin++ ) {
-      pixels.setPixelColor(pin, 0);
+      strip.setPixelColor(pin, 0);
   }
-  pixels.show();
+  strip.show();
   delay(2);
 
   for (int i = 2; i >= 0; i--) {
     for ( int pin = 0; pin < 5; pin++ ) {
-      pixels.setPixelColor(pin,  pixels.Color(0, Numbers[HighMin][pin][i] * 150,0));
+      strip.setPixelColor(pin,  strip.Color(0, Numbers[HighMin][pin][i] * 150,0));
     }
-    pixels.show();
+    strip.show();
     delay(2);
   }
 
   for (int i = 2; i >= 0; i--) {
     for ( int pin = 0; pin < 5; pin++ ) {
-      pixels.setPixelColor(pin, pixels.Color(0, Numbers[10][pin][i] * 150,0));
+      strip.setPixelColor(pin, strip.Color(0, Numbers[10][pin][i] * 150,0));
     }
-    pixels.show();
+    strip.show();
     delay(2);
   }
 
   for (int i = 2; i >= 0; i--) {
     for ( int pin = 0; pin < 5; pin++ ) {
-      pixels.setPixelColor(pin, pixels.Color(0, Numbers[LowHour][pin][i] * 150,0));
+      strip.setPixelColor(pin, strip.Color(0, Numbers[LowHour][pin][i] * 150,0));
     }
-    pixels.show();
+    strip.show();
     delay(2);
   }
 
   if( HighHour != 0 ){
     for ( int pin = 0; pin < 12; pin++ ) {
-      pixels.setPixelColor(pin, 0 );
+      strip.setPixelColor(pin, 0 );
     }
-    pixels.show();
+    strip.show();
     delay (2);
 
     for (int i = 2; i >= 0; i--) {
       for ( int pin = 0; pin < 5; pin++ ) {
-        pixels.setPixelColor(pin, pixels.Color(0, Numbers[HighHour][pin][i] * 150,0)); 
+        strip.setPixelColor(pin, strip.Color(0, Numbers[HighHour][pin][i] * 150,0)); 
       }
-      pixels.show();
+      strip.show();
       delay(2);
     }
   }
   
   for ( int pin = 0; pin < 12; pin++ ) {
-      pixels.setPixelColor(pin, 0 );
+      strip.setPixelColor(pin, 0 );
   }
-  pixels.show();
+  strip.show();
 
 
 }

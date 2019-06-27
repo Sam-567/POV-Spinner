@@ -1,44 +1,91 @@
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
-public class GridToArc{
+public class POVDisplay extends JFrame implements ActionListener{
 	
 	static final int SIZE = 400;
 	static final int MODSTEPS = 14;
 	static final double MODSTEPDISTANCE = SIZE / (2* MODSTEPS); //Modsteps go out from center
 	
-	static final int ARGSTEPS = 60;
+	static final int ARGSTEPS = 180;
 	static final double ARGSTEP = 360/ARGSTEPS;
-	//static final double 
+	
+	int[][][] radialImage;
+	BufferedImage ConvertedImage;
+	BufferedImage originalImage = new BufferedImage(400, 400, BufferedImage.TYPE_INT_ARGB);;
+	
+	UI userInterface;
 	
 	public static void main( String[] args) {
-		GridToArc g = new GridToArc();
-		//g.squareToRadial();
-		//g.TestValidPos();
-		//g.ValidPosImg();
+		POVDisplay g = new POVDisplay();
 		
+		/*
 		BufferedImage convert = null;
 		try {
-			convert = ImageIO.read( new File ("../MarioTest.png"));
+			convert = ImageIO.read( new File ("../Images/ExampleStartImage.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		int[][][] radial = g.squareToRadial(convert);
-		g.drawRadial(radial);
-		g.printImg(radial);
+		g.drawRadial(radial);*/
+	}
+	
+	public POVDisplay() {
+		super();
+		this.setSize(800, 600);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+		userInterface = new UI(this);
+		this.add(userInterface);
 		
+		
+		this.setVisible(true);
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == userInterface.Search) {		
+			String filePath = userInterface.selectFile();
+			if(filePath != null) {
+				try {
+					BufferedImage Image = ImageIO.read(new File(filePath));
+					java.awt.Image temp = Image.getScaledInstance(400, 400, Image.SCALE_SMOOTH);
+					
+					System.out.println(Image.getHeight());
+				    Graphics2D g2d = originalImage.createGraphics();
+				    g2d.drawImage(temp, 0, 0, null);
+				    g2d.dispose();
+					
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				userInterface.startImage = originalImage;
+				userInterface.updateInputImage();
+			}
+
+		} else if(e.getSource() == userInterface.Convert) {
+			squareToRadial(originalImage);
+			drawRadial(radialImage);
+			userInterface.finalImage = ConvertedImage;
+			userInterface.updateOutputImage();
+		}
 	}
 	
 	public int[][][] squareToRadial(BufferedImage Squareimg) {
 		
-		int[][][] radialImage = new int[3][ARGSTEPS][MODSTEPS];
+		radialImage = new int[3][ARGSTEPS][MODSTEPS];
 
 		int pixels;
 		int RedSum;
@@ -73,6 +120,7 @@ public class GridToArc{
 					radialImage[0][Arg][Mod] = RedSum/pixels;
 					radialImage[1][Arg][Mod] = GreenSum/pixels;
 					radialImage[2][Arg][Mod] = BlueSum/pixels;
+
 				}
 			}
 		}	
@@ -80,34 +128,34 @@ public class GridToArc{
 	}
 	
 	public void drawRadial(int[][][] Inputimg) {
-		BufferedImage Outputimg = new BufferedImage( 400, 400, BufferedImage.TYPE_3BYTE_BGR);
+		ConvertedImage = new BufferedImage( 400, 400, BufferedImage.TYPE_3BYTE_BGR);
 		
 		for (int Arg = 0; Arg < ARGSTEPS; Arg++) {	
 			for (int Mod  = 0; Mod < MODSTEPS; Mod++) {	
 				
-				//int SegmentColor = new Color( Inputimg[0][Arg][Mod], Inputimg[1][Arg][Mod], Inputimg[2][Arg][Mod]).getRGB();  
 				int SegmentColor = (Inputimg[0][Arg][Mod] << 16 | Inputimg[1][Arg][Mod] << 8 | Inputimg[2][Arg][Mod]);
 				
 				for (int x = 0; x < 400; x++) {
 					for (int y = 0; y < 400; y++) {
 						if( ValidPos( x - 200, 200-y, Arg, Mod)) {
-							Outputimg.setRGB(x, y, SegmentColor);
+							ConvertedImage.setRGB(x, y, SegmentColor);
 						}
 					}
 				}
 			}
 		}
 		System.out.println("Starting writing");
-		File Output = new File("OUTPUTIMG" + ".jpg");
+		File Output = new File("../Images/outputImage" + ".jpg");
 		try {
-			ImageIO.write(Outputimg, "jpg", Output);
+			ImageIO.write(ConvertedImage, "jpg", Output);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public void printImg(int[][][] Inputimg) {
+	//Old function to manually enter the image into arduino code
+	public void imgtoWrittenArray(int[][][] Inputimg) {
 		String Img = "{ ";
 		for(int[][] level1 : Inputimg) {
 			Img +="\n {";
@@ -152,8 +200,8 @@ public class GridToArc{
 		}
 	}
 
-
-	public boolean ValidPos (int x, int y, int Arg, int Mod) {
+	
+ 	public boolean ValidPos (int x, int y, int Arg, int Mod) {
 		double InnerLimit = MODSTEPDISTANCE * Mod;
 		double OuterLimit = InnerLimit + MODSTEPDISTANCE;
 		
